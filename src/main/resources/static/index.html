@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Java Challenge - Kurs Yönetim Sistemi</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 0; 
+            background-color: #f5f5f5;
+            color: #222;
+        }
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: linear-gradient(90deg,#0d6efd,#6610f2);
+            color: #fff;
+            padding: 18px 24px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        .header h1 { margin: 0; font-size: 22px; letter-spacing: .2px; }
+        .container { max-width: 1100px; margin: 24px auto; padding: 0 16px; }
+        .grid { display: grid; grid-template-columns: 1fr; gap: 18px; }
+        @media(min-width: 980px){ .grid { grid-template-columns: 1fr 1fr; } }
+
+        .section { 
+            padding: 20px; 
+            border: 1px solid #e5e7eb; 
+            border-radius: 12px; 
+            background: white;
+            box-shadow: 0 6px 14px rgba(0,0,0,0.06);
+        }
+        .section h2 { margin: 0 0 12px; color: #0d6efd; font-size: 18px; border-bottom: 1px dashed #cfe2ff; padding-bottom: 8px; }
+        .form-row { display: flex; gap: 10px; flex-wrap: wrap; }
+        .form-group { flex: 1; min-width: 220px; }
+        label { display: block; margin-bottom: 6px; font-weight: 600; color: #333; }
+        input, select { 
+            width: 100%; 
+            padding: 10px; 
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            background: #fff;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 3px rgba(13,110,253,0.15);
+        }
+        .actions { margin-top: 10px; }
+        button { 
+            padding: 10px 16px; 
+            margin: 8px 8px 0 0; 
+            background: #0d6efd; 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 14px;
+            transition: transform .08s ease, box-shadow .2s ease, background .2s ease;
+            box-shadow: 0 2px 6px rgba(13,110,253,.25);
+        }
+        button.secondary { background: #6c757d; box-shadow: 0 2px 6px rgba(108,117,125,.25); }
+        button.success { background: #28a745; box-shadow: 0 2px 6px rgba(40,167,69,.25); }
+        button.warning { background: #ffc107; color:#222; box-shadow: 0 2px 6px rgba(255,193,7,.25); }
+        button.danger { background: #dc3545; box-shadow: 0 2px 6px rgba(220,53,69,.25); }
+        button:hover { transform: translateY(-1px); }
+        .result { 
+            margin: 15px 0; 
+            padding: 14px; 
+            background: #f8f9fa; 
+            border-radius: 10px; 
+            border-left: 5px solid #28a745;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.45;
+            max-height: 300px;
+            overflow: auto;
+        }
+        .error { background: #fde8ea; color: #721c24; border-left-color: #dc3545; }
+        .success { background: #e6f4ea; color: #155724; border-left-color: #28a745; }
+        .footer { text-align: center; color: #666; padding: 24px 0 36px; font-size: 13px; }
+        .pill { display:inline-block; padding: 3px 8px; border-radius: 999px; background: #e9ecef; font-size: 12px; color:#333; margin-left:6px; }
+        .kbd { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; background:#eee; padding:2px 6px; border-radius:6px; border:1px solid #ddd; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🚀 Java Challenge - Kurs Yönetim Sistemi <span class="pill">Demo UI</span></h1>
+    </div>
+
+    <div class="container">
+        <div class="grid">
+            <!-- Teacher Section -->
+            <div class="section">
+                <h2>👨‍🏫 Öğretmen İşlemleri</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>İsim</label>
+                        <input type="text" id="teacherName" placeholder="Öğretmen adı">
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="teacherEmail" placeholder="email@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Uzmanlık</label>
+                        <input type="text" id="teacherSpecialization" placeholder="Java Programming">
+                    </div>
+                </div>
+                <div class="actions">
+                    <button class="success" onclick="createTeacher()">Öğretmen Oluştur</button>
+                    <button class="secondary" onclick="getTeachers()">Öğretmenleri Listele</button>
+                </div>
+                <div id="teacherResult" class="result"></div>
+            </div>
+
+            <!-- Course Section -->
+            <div class="section">
+                <h2>📚 Kurs İşlemleri</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Öğretmen ID</label>
+                        <input type="number" id="courseTeacherId" placeholder="1">
+                    </div>
+                    <div class="form-group">
+                        <label>Kurs Adı</label>
+                        <input type="text" id="courseTitle" placeholder="Java Fundamentals">
+                    </div>
+                    <div class="form-group">
+                        <label>Açıklama</label>
+                        <input type="text" id="courseDescription" placeholder="Temel Java programlama">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Fiyat</label>
+                        <input type="number" id="coursePrice" placeholder="299.99" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>Max Öğrenci</label>
+                        <input type="number" id="courseMaxStudents" placeholder="20">
+                    </div>
+                </div>
+                <div class="actions">
+                    <button class="success" onclick="createCourse()">Kurs Oluştur</button>
+                    <button class="secondary" onclick="getAllCourses()">Tüm Kursları Listele</button>
+                    <button class="secondary" onclick="getCoursesForTeacher()">Öğretmen Kurslarını Listele</button>
+                </div>
+                <div id="courseResult" class="result"></div>
+            </div>
+
+            <!-- Student Section -->
+            <div class="section">
+                <h2>👨‍🎓 Öğrenci İşlemleri</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>İsim</label>
+                        <input type="text" id="studentName" placeholder="Öğrenci adı">
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="studentEmail" placeholder="student@example.com">
+                    </div>
+                </div>
+                <div class="actions">
+                    <button class="success" onclick="createStudent()">Öğrenci Ekle</button>
+                </div>
+                <div id="studentResult" class="result"></div>
+            </div>
+
+            <!-- Cart Section -->
+            <div class="section">
+                <h2>🛒 Sepet İşlemleri</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Öğrenci ID</label>
+                        <input type="number" id="cartStudentId" placeholder="1">
+                    </div>
+                    <div class="form-group">
+                        <label>Kurs ID</label>
+                        <input type="number" id="cartCourseId" placeholder="1">
+                    </div>
+                </div>
+                <div class="actions">
+                    <button class="success" onclick="addToCart()">Sepete Ekle</button>
+                    <button class="secondary" onclick="getCart()">Sepeti Görüntüle</button>
+                    <button class="danger" onclick="emptyCart()">Sepeti Boşalt</button>
+                </div>
+                <div class="result"><span class="kbd">İpucu:</span> Önce öğrenci ve kurs oluşturup sonra ekleyin.</div>
+                <div id="cartResult" class="result"></div>
+            </div>
+
+            <!-- Order Section -->
+            <div class="section">
+                <h2>📋 Sipariş İşlemleri</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Öğrenci ID</label>
+                        <input type="number" id="orderStudentId" placeholder="1">
+                    </div>
+                </div>
+                <div class="actions">
+                    <button class="success" onclick="placeOrder()">Sipariş Ver</button>
+                    <button class="secondary" onclick="getOrdersForCustomer()">Müşteri Siparişlerini Listele</button>
+                </div>
+                <div id="orderResult" class="result"></div>
+            </div>
+        </div>
+
+        <div class="footer">
+            Spring Boot + H2 + Vanilla JS • UI sadece demo amaçlıdır.
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8080/api';
+
+        // Teacher Functions
+        async function createTeacher() {
+            const teacherName = document.getElementById('teacherName').value;
+            const teacherEmail = document.getElementById('teacherEmail').value;
+            const teacherSpecialization = document.getElementById('teacherSpecialization').value;
+            
+            // Validation
+            if (!teacherName || !teacherEmail || !teacherSpecialization) {
+                showError('teacherResult', 'Lütfen tüm alanları doldurun!');
+                return;
+            }
+            
+            const teacher = {
+                name: teacherName,
+                email: teacherEmail,
+                specialization: teacherSpecialization
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/teachers`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(teacher)
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    showResult('teacherResult', result, 'Öğretmen başarıyla oluşturuldu!');
+                    // Form'u temizle
+                    document.getElementById('teacherName').value = '';
+                    document.getElementById('teacherEmail').value = '';
+                    document.getElementById('teacherSpecialization').value = '';
+                } else {
+                    const errorText = await response.text();
+                    showError('teacherResult', `Öğretmen oluşturulamadı: ${errorText}`);
+                }
+            } catch (error) {
+                showError('teacherResult', `Hata: ${error.message}`);
+            }
+        }
+
+        async function getTeachers() {
+            try {
+                const response = await fetch(`${API_BASE}/teachers`);
+                const teachers = await response.json();
+                showResult('teacherResult', teachers, 'Öğretmenler listelendi');
+            } catch (error) {
+                showError('teacherResult', error.message);
+            }
+        }
+
+        // Course Functions
+        async function createCourse() {
+            const teacherIdRaw = document.getElementById('courseTeacherId').value;
+            const courseTitleRaw = document.getElementById('courseTitle').value;
+            const courseDescriptionRaw = document.getElementById('courseDescription').value;
+            const coursePriceRaw = document.getElementById('coursePrice').value;
+            const courseMaxStudentsRaw = document.getElementById('courseMaxStudents').value;
+            
+            const teacherIdStr = (teacherIdRaw || '').toString().trim();
+            const courseTitle = (courseTitleRaw || '').toString().trim();
+            const courseDescription = (courseDescriptionRaw || '').toString().trim();
+            const coursePriceNum = parseFloat((coursePriceRaw || '').toString().trim());
+            const courseMaxStudentsNum = parseInt((courseMaxStudentsRaw || '').toString().trim());
+            
+            const missing = [];
+            if (!teacherIdStr) missing.push('Öğretmen ID');
+            if (!courseTitle) missing.push('Kurs Adı');
+            if (!courseDescription) missing.push('Açıklama');
+            if (isNaN(coursePriceNum)) missing.push('Fiyat');
+            if (isNaN(courseMaxStudentsNum)) missing.push('Max Öğrenci');
+            
+            if (missing.length > 0) {
+                showError('courseResult', `Lütfen şu alanları doldurun: ${missing.join(', ')}`);
+                return;
+            }
+            
+            const teacherId = Number(teacherIdStr);
+            const course = {
+                title: courseTitle,
+                description: courseDescription,
+                price: coursePriceNum,
+                maxStudents: courseMaxStudentsNum
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/courses/teacher/${teacherId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(course)
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    showResult('courseResult', result, 'Kurs başarıyla oluşturuldu!');
+                    // form temizle
+                    document.getElementById('courseTitle').value = '';
+                    document.getElementById('courseDescription').value = '';
+                    document.getElementById('coursePrice').value = '';
+                    document.getElementById('courseMaxStudents').value = '';
+                } else {
+                    const errorText = await response.text();
+                    showError('courseResult', `Kurs oluşturulamadı: ${errorText}`);
+                }
+            } catch (error) {
+                showError('courseResult', `Hata: ${error.message}`);
+            }
+        }
+
+        async function getCoursesForTeacher() {
+            const teacherId = document.getElementById('courseTeacherId').value;
+            
+            if (!teacherId) {
+                showError('courseResult', 'Lütfen öğretmen ID girin!');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/courses/teacher/${teacherId}`);
+                if (response.ok) {
+                    const courses = await response.json();
+                    showResult('courseResult', courses, `Öğretmen ID: ${teacherId} kursları listelendi`);
+                } else {
+                    const errorText = await response.text();
+                    showError('courseResult', `Kurslar listelenemedi: ${errorText}`);
+                }
+            } catch (error) {
+                showError('courseResult', `Hata: ${error.message}`);
+            }
+        }
+
+        async function getAllCourses() {
+            try {
+                const response = await fetch(`${API_BASE}/courses`);
+                if (response.ok) {
+                    const courses = await response.json();
+                    showResult('courseResult', courses, 'Tüm kurslar listelendi');
+                } else {
+                    const errorText = await response.text();
+                    showError('courseResult', `Kurslar listelenemedi: ${errorText}`);
+                }
+            } catch (error) {
+                showError('courseResult', `Hata: ${error.message}`);
+            }
+        }
+
+        // Student Functions
+        async function createStudent() {
+            const studentName = document.getElementById('studentName').value;
+            const studentEmail = document.getElementById('studentEmail').value;
+            
+            // Validation
+            if (!studentName || !studentEmail) {
+                showError('studentResult', 'Lütfen tüm alanları doldurun!');
+                return;
+            }
+            
+            const student = {
+                name: studentName,
+                email: studentEmail
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/students`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(student)
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    showResult('studentResult', result, 'Öğrenci başarıyla eklendi!');
+                    // Form'u temizle
+                    document.getElementById('studentName').value = '';
+                    document.getElementById('studentEmail').value = '';
+                } else {
+                    const errorText = await response.text();
+                    showError('studentResult', `Öğrenci eklenemedi: ${errorText}`);
+                }
+            } catch (error) {
+                showError('studentResult', `Hata: ${error.message}`);
+            }
+        }
+
+        // Cart Functions
+        async function addToCart() {
+            const studentId = document.getElementById('cartStudentId').value;
+            const courseId = document.getElementById('cartCourseId').value;
+            
+            // Validation
+            if (!studentId || !courseId) {
+                showError('cartResult', 'Lütfen öğrenci ID ve kurs ID girin!');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/cart/${studentId}/add/${courseId}`, {
+                    method: 'POST'
+                });
+                if (response.ok) {
+                    showResult('cartResult', null, 'Kurs başarıyla sepete eklendi!');
+                } else {
+                    const error = await response.text();
+                    showError('cartResult', `Kurs sepete eklenemedi: ${error}`);
+                }
+            } catch (error) {
+                showError('cartResult', `Hata: ${error.message}`);
+            }
+        }
+
+        async function getCart() {
+            const studentId = document.getElementById('cartStudentId').value;
+            
+            if (!studentId) {
+                showError('cartResult', 'Lütfen öğrenci ID girin!');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/cart/${studentId}`);
+                if (response.ok) {
+                    const cart = await response.json();
+                    showResult('cartResult', cart, 'Sepet görüntülendi');
+                } else {
+                    const errorText = await response.text();
+                    showError('cartResult', `Sepet görüntülenemedi: ${errorText}`);
+                }
+            } catch (error) {
+                showError('cartResult', `Hata: ${error.message}`);
+            }
+        }
+
+        async function emptyCart() {
+            const studentId = document.getElementById('cartStudentId').value;
+            
+            if (!studentId) {
+                showError('cartResult', 'Lütfen öğrenci ID girin!');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/cart/${studentId}`, {
+                    method: 'DELETE'
+                });
+                if (response.ok) {
+                    showResult('cartResult', null, 'Sepet başarıyla boşaltıldı!');
+                } else {
+                    const errorText = await response.text();
+                    showError('cartResult', `Sepet boşaltılamadı: ${errorText}`);
+                }
+            } catch (error) {
+                showError('cartResult', `Hata: ${error.message}`);
+            }
+        }
+
+        // Order Functions
+        async function placeOrder() {
+            const studentId = document.getElementById('orderStudentId').value;
+            
+            if (!studentId) {
+                showError('orderResult', 'Lütfen öğrenci ID girin!');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/orders/${studentId}/place`, {
+                    method: 'POST'
+                });
+                if (response.ok) {
+                    const order = await response.json();
+                    showResult('orderResult', order, 'Sipariş başarıyla oluşturuldu!');
+                } else {
+                    const errorText = await response.text();
+                    showError('orderResult', `Sipariş oluşturulamadı: ${errorText}`);
+                }
+            } catch (error) {
+                showError('orderResult', `Hata: ${error.message}`);
+            }
+        }
+
+        async function getOrdersForCustomer() {
+            const studentId = document.getElementById('orderStudentId').value;
+            
+            if (!studentId) {
+                showError('orderResult', 'Lütfen öğrenci ID girin!');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/orders/customer/${studentId}`);
+                if (response.ok) {
+                    const orders = await response.json();
+                    showResult('orderResult', orders, 'Siparişler listelendi');
+                } else {
+                    const errorText = await response.text();
+                    showError('orderResult', `Siparişler listelenemedi: ${errorText}`);
+                }
+            } catch (error) {
+                showError('orderResult', `Hata: ${error.message}`);
+            }
+        }
+
+        // Utility Functions
+        function showResult(elementId, data, message) {
+            const element = document.getElementById(elementId);
+            element.className = 'result success';
+            
+            if (data) {
+                // JSON'u daha okunabilir hale getir
+                let formattedData = '';
+                if (Array.isArray(data)) {
+                    formattedData = '<h4>📋 Liste:</h4>';
+                    data.forEach((item, index) => {
+                        formattedData += `<div style="margin: 10px 0; padding: 10px; background: #e9ecef; border-radius: 5px;">`;
+                        formattedData += `<strong>#${index + 1}</strong><br>`;
+                        formattedData += formatObject(item);
+                        formattedData += '</div>';
+                    });
+                } else {
+                    formattedData = '<h4>📄 Detay:</h4>';
+                    formattedData += formatObject(data);
+                }
+                
+                element.innerHTML = `<strong>✅ ${message}</strong><br><br>${formattedData}`;
+            } else {
+                element.innerHTML = `<strong>✅ ${message}</strong>`;
+            }
+        }
+
+        function formatObject(obj) {
+            let result = '';
+            for (const [key, value] of Object.entries(obj)) {
+                if (key === 'courses' && Array.isArray(value)) {
+                    result += `<strong>${key}:</strong> ${value.length} kurs<br>`;
+                } else if (key === 'createdAt' || key === 'updatedAt') {
+                    const date = new Date(value);
+                    result += `<strong>${key}:</strong> ${date.toLocaleString('tr-TR')}<br>`;
+                } else if (typeof value === 'object' && value !== null) {
+                    result += `<strong>${key}:</strong> [Object]<br>`;
+                } else {
+                    result += `<strong>${key}:</strong> ${value}<br>`;
+                }
+            }
+            return result;
+        }
+
+        function showError(elementId, error) {
+            const element = document.getElementById(elementId);
+            element.className = 'result error';
+            element.innerHTML = `<strong>❌ Hata:</strong> ${error}`;
+        }
+    </script>
+</body>
+</html>
